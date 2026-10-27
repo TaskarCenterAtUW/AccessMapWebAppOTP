@@ -3,7 +3,7 @@ import { RouteResult } from "types";
 import {
   selfCancelingFetchDirections,
   SignaledDirectionsOptions,
-} from "api/unweaver";
+} from "api/otp";
 import { WaypointsState } from "features/waypoints/waypoints-slice";
 import { ProfilesState } from "features/profiles/profiles-slice";
 import { TripOptionsState } from "features/trip-options/trip-options-slice";
@@ -47,14 +47,11 @@ export const requestDirections = createAsyncThunk(
 
     const response = await selfCancelingFetchDirections(directionsOptions);
 
-    if (response.code === "Error") {
+    if (response.code !== "Ok") {
+      // Error, NoRoute, LocationNotFound, OutsideServicePeriod, OutsideBounds
       return rejectWithValue(response.message);
-    } else if (response.code === "NoRoute" || response.code === "NoPath") {
-      return rejectWithValue("No Route");
-    } else if (response.code === "NoGraph") {
-      return rejectWithValue("No Graph (site error)");
     }
-    return response;
+    return response.routeResult;
   },
   {
     condition: (arg, { getState }): boolean => {

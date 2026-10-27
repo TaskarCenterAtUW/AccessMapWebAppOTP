@@ -13,33 +13,33 @@ module.exports = merge(common, {
       new UglifyJsPlugin({
         uglifyOptions: {
           compress: {
-            drop_console: true
-          }
-        }
-      })
-    ]
+            drop_console: true,
+          },
+        },
+      }),
+    ],
   },
   plugins: [
     new webpack.DefinePlugin({
       NODE_ENV: JSON.stringify("production"),
-      MAPBOX_TOKEN: JSON.stringify(process.env.MAPBOX_TOKEN),
+      MAPTILER_KEY: JSON.stringify(process.env.MAPTILER_KEY),
       API_SERVER: JSON.stringify(process.env.API_SERVER),
       ROUTING_SERVER: JSON.stringify(process.env.ROUTING_SERVER),
       TILE_SERVER: JSON.stringify(process.env.TILE_SERVER),
       ANALYTICS_SERVER: JSON.stringify(process.env.ANALYTICS_SERVER),
       ANALYTICS: JSON.stringify(process.env.ANALYTICS),
-      ANALYTICS_KEY: JSON.stringify(process.env.ANALYTICS_KEY)
+      ANALYTICS_KEY: JSON.stringify(process.env.ANALYTICS_KEY),
     }),
     new webpack.LoaderOptionsPlugin({
       minimize: true,
-      debug: false
+      debug: false,
     }),
     new OptimizeCSSAssetsPlugin({}),
     new HtmlWebpackPlugin({
       title: "AccessMap",
       filename: "index.html",
       template: "src/index.prod.html",
-      inject: false
-    })
-  ]
+      inject: false,
+    }),
+  ],
 });

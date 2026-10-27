@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 
 import ReactMapGL, { FlyToInterpolator } from "react-map-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -36,6 +36,19 @@ const loadImageIfNotLoaded = (map, name, image) => {
   }
 };
 
+// MapTiler base map style. Change the style id here to switch base maps.
+const MAPTILER_STYLE_ID = "streets-v2";
+const MAP_STYLE = `https://api.maptiler.com/maps/${MAPTILER_STYLE_ID}/style.json?key=${MAPTILER_KEY}`;
+
+// Id of the first symbol (label) layer in the loaded base style, so AccessMap
+// lines can be drawn beneath the base map's labels. Returns undefined if the
+// style has no symbol layers (AccessMap layers then go on top).
+const getFirstSymbolLayerId = (map): string | undefined => {
+  const layers = map.getStyle().layers || [];
+  const symbolLayer = layers.find((layer) => layer.type === "symbol");
+  return symbolLayer ? symbolLayer.id : undefined;
+};
+
 const loadImageObjectIfNotLoaded = (map, name, image) => {
   if (!map.hasImage(name)) map.addImage(name, image);
 };
@@ -43,6 +56,13 @@ const loadImageObjectIfNotLoaded = (map, name, image) => {
 const Map = () => {
   // TODO: pull up redux state to this level, make other components simple?
   const mapRef = useRef(null);
+
+  // AccessMap layers that are ordered relative to the base style are only
+  // rendered once the base style has loaded and its label layer is known.
+  const [baseStyleLoaded, setBaseStyleLoaded] = useState<boolean>(false);
+  const [labelLayerId, setLabelLayerId] = useState<string | undefined>(
+    undefined
+  );
 
   useEffect(() => {
     // Attempt to load the custom image if it hasn't yet been added
@@ -80,9 +100,8 @@ const Map = () => {
         transitionDuration={transitionDuration}
         transitionInterpolator={new FlyToInterpolator()}
         transitionEasing={easeExpOut}
-        mapboxApiAccessToken={MAPBOX_TOKEN}
-        mapStyle="mapbox://styles/accessmap/cjglbmftk00202tqmpidtfxk3"
-        interactiveLayerIds={CLICKABLE_LAYERS}
+        mapStyle={MAP_STYLE}
+        interactiveLayerIds={baseStyleLoaded ? CLICKABLE_LAYERS : undefined}
         onViewStateChange={({ viewState, interactionState }) => {
           const { longitude, latitude, zoom, transitionDuration } = viewState;
 
@@ -125,6 +144,9 @@ const Map = () => {
           const map = mapRef.current.getMap();
           const bounds = map.getBounds().toArray();
 
+          setLabelLayerId(getFirstSymbolLayerId(map));
+          setBaseStyleLoaded(true);
+
           dispatch(
             load({
               bounds: [bounds[0][0], bounds[0][1], bounds[1][0], bounds[1][1]],
@@ -134,11 +156,13 @@ const Map = () => {
           );
         }}
         onClick={(pointerEvent) => {
-          const features = mapRef.current
-            .getMap()
-            .queryRenderedFeatures(pointerEvent.point, {
-              layers: CLICKABLE_LAYERS,
-            });
+          const features = baseStyleLoaded
+            ? mapRef.current
+                .getMap()
+                .queryRenderedFeatures(pointerEvent.point, {
+                  layers: CLICKABLE_LAYERS,
+                })
+            : [];
 
           if (features.length) {
             const feature = features[0];
@@ -175,15 +199,25 @@ const Map = () => {
         <RegionsMaskSource />
         <TasksSource />
 
-        {hasRoute && <RouteLayers />}
-        <ElevatorPathLayers />
-        <CrossingsLayers avoidCurbs={profile.avoidCurbs} />
-        <SidewalkLayers
-          uphillMax={profile.uphillMax}
-          downhillMax={profile.downhillMax}
-          speed={profile.speed}
-          uphillMode={uphillMode}
-        />
+        {baseStyleLoaded && (
+          <>
+            <ElevatorPathLayers beforeId={labelLayerId} />
+            <CrossingsLayers
+              avoidCurbs={profile.avoidCurbs}
+              beforeId={labelLayerId}
+            />
+            <SidewalkLayers
+              uphillMax={profile.uphillMax}
+              downhillMax={profile.downhillMax}
+              speed={profile.speed}
+              uphillMode={uphillMode}
+              beforeId={labelLayerId}
+            />
+            {/* The route goes beneath the labels too, but above the sidewalks
+                and crossings, since it is added after them */}
+            {hasRoute && <RouteLayers beforeId={labelLayerId} />}
+          </>
+        )}
         {/*<RegionsLayer />*/}
         <GeolocationLayers />
         <WaypointsLayers />

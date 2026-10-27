@@ -2,13 +2,14 @@ import React from "react";
 
 import SVGIcon from "react-md/src/js/SVGIcons";
 
-import { Route } from "types";
+import { PedestrianSegment } from "types";
 
 interface Props {
-  route: Route;
+  // Walked OpenSidewalks segments, in travel order
+  segments: PedestrianSegment[];
 }
 
-const ElevationProfile = ({ route }: Props) => {
+const ElevationProfile = ({ segments }: Props) => {
   const w = 100;
   const h = 50;
   const insetBy = 4;
@@ -16,24 +17,25 @@ const ElevationProfile = ({ route }: Props) => {
   const marginBottom = 6;
 
   const data = [[0, 0]];
-  const legs = route.legs;
   let totalLength = 0;
   let totalHeight = 0;
   let maxHeight = 0;
   let minHeight = 0;
-  legs.forEach((leg) => {
-    leg.forEach((step) => {
-      const incline = step.properties.incline || 0;
-      const height = step.properties._length * incline;
-      totalLength += step.properties._length;
-      totalHeight += height;
+  segments.forEach((segment) => {
+    const length = segment.distance || 0;
+    const incline = segment.incline || 0;
+    totalLength += length;
+    totalHeight += length * incline;
 
-      maxHeight = Math.max(maxHeight, totalHeight);
-      minHeight = Math.min(minHeight, totalHeight);
+    maxHeight = Math.max(maxHeight, totalHeight);
+    minHeight = Math.min(minHeight, totalHeight);
 
-      data.push([totalLength, totalHeight]);
-    });
+    data.push([totalLength, totalHeight]);
   });
+
+  // Nothing to plot without walked distance
+  if (totalLength <= 0) return null;
+  const heightRange = maxHeight - minHeight;
 
   const xMin = insetBy;
   const xMax = w - insetBy - marginRight;
@@ -45,7 +47,7 @@ const ElevationProfile = ({ route }: Props) => {
 
   const normalized = data.map((d) => [
     dx * (d[0] / totalLength),
-    dy * ((d[1] - minHeight) / (maxHeight - minHeight)),
+    heightRange > 0 ? dy * ((d[1] - minHeight) / heightRange) : 0,
   ]);
 
   // TODO: don't use SVGIcon? Plain SVG would be appropriate.
@@ -62,10 +64,10 @@ const ElevationProfile = ({ route }: Props) => {
           .join(" ")}
       />
       <text x={w - marginRight} y={6} fontSize={6}>
-        {maxHeight.toPrecision(1)}
+        {maxHeight.toFixed(1)}
       </text>
       <text x={w - marginRight} y={h - marginBottom} fontSize={6}>
-        {minHeight.toPrecision(1)}
+        {minHeight.toFixed(1)}
       </text>
       <text
         x={w - 8}
@@ -82,7 +84,7 @@ const ElevationProfile = ({ route }: Props) => {
         {0}
       </text>
       <text x={w - marginRight - 8} y={h} fontSize={6}>
-        {totalLength.toPrecision(1)}
+        {Math.round(totalLength)}
       </text>
       <text
         x={Math.floor((w - marginRight) / 2)}

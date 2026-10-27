@@ -2,34 +2,81 @@ import React from "react";
 
 import Card, { CardTitle, CardText } from "react-md/src/js/Cards";
 
-import units from "constants/units";
+import formatDistance from "utils/format-distance";
+
+const SURFACES = {
+  asphalt: "Asphalt",
+  concrete: "Concrete",
+  gravel: "Gravel",
+  grass: "Grass",
+  paved: "Paved",
+  paving_stones: "Paving Stones",
+  unpaved: "Unpaved",
+  dirt: "Dirt",
+  grass_paver: "Grass Paver",
+};
+
+// Describes a grade in the direction of travel, e.g. 0.05 is "Slight uphill".
+const inclineText = (incline: number): string => {
+  if (incline <= -0.075) return "Steep downhill";
+  if (incline <= -0.025) return "Slight downhill";
+  if (incline < 0) return "Minimal downhill";
+  if (incline < 0.025) return "Minimal uphill";
+  if (incline < 0.075) return "Slight uphill";
+  return "Steep uphill";
+};
+
+export type StepMode = "pedestrian" | "bus" | "railway" | "road";
 
 interface Props {
   title: string;
   subtitle?: string;
   distance?: number;
-  feet?: boolean;
+  surface?: string;
+  incline?: number;
+  details?: string[];
+  // Colors the bar on the left of the step. Messages, such as arriving at the
+  // destination, have none.
+  mode?: StepMode;
+  // A pathway inside a station
+  indoor?: boolean;
 }
 
 const Step = ({
   title,
   subtitle = "",
   distance = null,
-  feet = false,
+  surface = null,
+  incline = null,
+  details = [],
+  mode = null,
+  indoor = false,
 }: Props) => {
-  let distanceText = null;
-  if (distance) {
-    if (feet) {
-      distanceText = `${(distance * units.feetPerMeter).toPrecision(1)} meters`;
-    } else {
-      distanceText = `${distance.toPrecision(1)} meters`;
-    }
-  }
+  const className = ["step", mode && `mode-${mode}`, indoor && "step-indoor"]
+    .filter(Boolean)
+    .join(" ");
 
   return (
-    <Card className="step">
+    <Card className={className}>
       <CardTitle title={title} subtitle={subtitle} />
-      <CardText>{distanceText}</CardText>
+      {surface && (
+        <CardText className="step-surface">
+          Surface: {SURFACES[surface] || surface.replace(/_/g, " ")}
+        </CardText>
+      )}
+      {incline !== null && incline !== 0 && (
+        <CardText className="step-incline">
+          Incline: {inclineText(incline)}
+        </CardText>
+      )}
+      {details.map((detail) => (
+        <CardText key={detail} className="step-detail">
+          {detail}
+        </CardText>
+      ))}
+      {distance !== null && (
+        <CardText>{formatDistance(distance, "imperial", 1)}</CardText>
+      )}
     </Card>
   );
 };

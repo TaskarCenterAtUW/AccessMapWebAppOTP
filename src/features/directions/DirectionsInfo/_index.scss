@@ -1,4 +1,17 @@
 .directions-info--contents {
+  display: flex;
+  flex-direction: column;
   height: 90%;
   overflow: auto;
+
+  .md-list {
+    flex-grow: 1;
+  }
+
+  .disclaimer {
+    font-size: 0.85em;
+    color: #666;
+    margin-top: auto;
+    padding-top: 10px;
+  }
 }

@@ -13,6 +13,8 @@ interface Props {
   downhillMax: number;
   speed: number;
   uphillMode: boolean;
+  // Base-style layer to draw beneath (undefined = top of the style)
+  beforeId?: string;
 }
 
 const SidewalkLayers = ({
@@ -20,6 +22,7 @@ const SidewalkLayers = ({
   downhillMax,
   speed,
   uphillMode = true,
+  beforeId,
 }: Props) => {
   // Pick an odd number so that equal amount on each side of 0
   const nSamples = 15;
@@ -59,9 +62,9 @@ const SidewalkLayers = ({
     10,
     0.1,
     16,
-    5,
+    3,
     20,
-    24,
+    14,
   ];
 
   const isSidewalkExpression = ["==", ["get", "footway"], "sidewalk"];
@@ -98,7 +101,7 @@ const SidewalkLayers = ({
           "line-width": widthExpression,
           "line-opacity": 0,
         }}
-        beforeId="bridge-street"
+        beforeId={beforeId}
       />
       <Layer
         id="sidewalk-outline"
@@ -123,7 +126,7 @@ const SidewalkLayers = ({
           },
           "line-gap-width": widthExpression,
         }}
-        beforeId="bridge-street"
+        beforeId={beforeId}
       />
       <Layer
         id="sidewalk-inaccessible"
@@ -146,7 +149,7 @@ const SidewalkLayers = ({
             WIDTH_INACCESSIBLE * 4,
           ],
         }}
-        beforeId="bridge-street"
+        beforeId={beforeId}
       />
       <Layer
         id="sidewalk"
@@ -172,7 +175,7 @@ const SidewalkLayers = ({
           "line-color-transition": { duration: 0 },
           "line-width": widthExpression,
         }}
-        beforeId="bridge-street"
+        beforeId={beforeId}
       />
       <Layer
         id="sidewalk-downhill-arrow"
@@ -239,7 +242,7 @@ const SidewalkLayers = ({
             0.9,
           ],
         }}
-        beforeId="bridge-street"
+        beforeId={beforeId}
       />
     </>
   );

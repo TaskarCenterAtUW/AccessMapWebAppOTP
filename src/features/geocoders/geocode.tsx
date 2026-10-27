@@ -1,4 +1,4 @@
-import MapboxClient from "mapbox/lib/services/geocoding";
+const MAPTILER_GEOCODING_URL = "https://api.maptiler.com/geocoding";
 
 type BboxType = [number, number, number, number];
 interface Proximity {
@@ -6,12 +6,12 @@ interface Proximity {
   latitude: number;
 }
 
-interface MapboxGeocoderResult {
+interface GeocoderResult {
   name: string;
   location: number[];
 }
 
-type GeocoderCallback = (geocoded: MapboxGeocoderResult[]) => void;
+type GeocoderCallback = (geocoded: GeocoderResult[]) => void;
 
 const geocode = (
   value: string,
@@ -23,20 +23,40 @@ const geocode = (
     return;
   }
 
-  const mapboxClient = new MapboxClient(MAPBOX_TOKEN);
   // TODO: set country code from region
-  const geocoderOptions = {
-    proximity: proximity,
-    bbox: bbox,
-  };
+  const params = new URLSearchParams({ key: MAPTILER_KEY });
+  if (proximity) {
+    params.set("proximity", `${proximity.longitude},${proximity.latitude}`);
+  }
+  if (bbox) {
+    // [minLon, minLat, maxLon, maxLat]
+    params.set("bbox", bbox.join(","));
+  }
 
-  mapboxClient.geocodeForward(value, geocoderOptions).then((results) => {
-    const places: MapboxGeocoderResult[] = results.entity.features.map((d) => ({
-      name: d.place_name,
-      location: { longitude: d.center[0], latitude: d.center[1] },
-    }));
-    callback(places);
-  });
+  const url = `${MAPTILER_GEOCODING_URL}/${encodeURIComponent(
+    value
+  )}.json?${params.toString()}`;
+
+  fetch(url)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Geocoding request failed: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then((results) => {
+      const features = (results && results.features) || [];
+      const places: GeocoderResult[] = features
+        .filter((d) => d.center && d.center.length >= 2)
+        .map((d) => ({
+          name: d.place_name || d.text,
+          location: { longitude: d.center[0], latitude: d.center[1] },
+        }));
+      callback(places);
+    })
+    .catch((error) => {
+      console.warn(error);
+    });
 };
 
 export default geocode;

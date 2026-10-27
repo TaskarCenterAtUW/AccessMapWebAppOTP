@@ -1,4 +1,3 @@
-import { RouteResult } from "types";
 import { Profile } from "profiles/profiles";
 import { Waypoint } from "features/waypoints/waypoints-slice";
 import { TripOptionsState } from "features/trip-options/trip-options-slice";
@@ -11,9 +10,9 @@ export interface DirectionsOptions {
   signal?: AbortSignal;
 }
 
-const fetchDirections = async (
-  options: DirectionsOptions
-): Promise<RouteResult> => {
+// Legacy Unweaver client, no longer used: AccessMap routes with OpenTripPlanner
+// (see api/otp). Its response does not match the current RouteResult type.
+const fetchDirections = async (options: DirectionsOptions): Promise<any> => {
   const { origin, destination, profile, tripOptions } = options;
 
   const {

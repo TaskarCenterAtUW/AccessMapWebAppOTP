@@ -1,3 +1,32 @@
 .step {
   margin-bottom: 8px;
 }
+
+// A pathway inside a station
+.step-indoor {
+  background-color: #fffbf0;
+}
+
+// The bar on the left of a step shows how it is travelled
+.mode-pedestrian {
+  box-shadow: inset 8px 0 0 0 #4bf;
+}
+
+.mode-bus {
+  box-shadow: inset 8px 0 0 0 #4b2e83;
+}
+
+.mode-railway {
+  box-shadow: inset 8px 0 0 0 #28813f;
+}
+
+.mode-road {
+  box-shadow: inset 8px 0 0 0 #d93025;
+}
+
+.step-surface,
+.step-incline,
+.step-detail {
+  padding-top: 0;
+  padding-bottom: 8px;
+}

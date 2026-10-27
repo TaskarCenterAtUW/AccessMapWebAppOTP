@@ -1,15 +1,37 @@
 import bbox from "@turf/bbox";
+import { FeatureCollection, LineString } from "geojson";
 
-const routeBounds = (routeResult): [number, number, number, number] => {
-  // Bounding box of the on-network route path
-  const bboxBounds = bbox({
-    type: "Feature",
-    geometry: routeResult.routes[0].geometry,
-  });
+import { RouteResult } from "types";
 
+const routeBounds = (
+  routeResult: RouteResult
+): [number, number, number, number] => {
   // Coordinates of the origin/destination pair
   const [ox, oy] = routeResult.origin.geometry.coordinates;
   const [ex, ey] = routeResult.destination.geometry.coordinates;
+
+  const legs = routeResult.itinerary.legs.filter(
+    (leg) => leg.geometry.coordinates.length > 0
+  );
+  if (legs.length === 0) {
+    return [
+      Math.min(ox, ex),
+      Math.min(oy, ey),
+      Math.max(ox, ex),
+      Math.max(oy, ey),
+    ];
+  }
+
+  // Bounding box of the on-network route path, all legs (walk and transit)
+  const legsCollection: FeatureCollection<LineString> = {
+    type: "FeatureCollection",
+    features: legs.map((leg) => ({
+      type: "Feature",
+      geometry: leg.geometry,
+      properties: {},
+    })),
+  };
+  const bboxBounds = bbox(legsCollection);
 
   // Adjust the bounding box to include the origin or destination if they fall
   // outside of the on-network route bounding box.

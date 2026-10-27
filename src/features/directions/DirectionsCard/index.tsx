@@ -10,6 +10,8 @@ import {
   clickDirectionsInfoButton,
 } from "features/directions/directions-slice";
 
+import formatDistance from "utils/format-distance";
+import { formatDuration, formatTime } from "utils/trip-time";
 import {
   OMNICARD_DESKTOP_WIDTH,
   OMNICARD_MOBILE_LANDSCAPE_WIDTH,
@@ -27,10 +29,18 @@ const DirectionsCard = () => {
   if (currentActivity === "directions-info") return null;
   if (currentActivity === "directions-steps") return null;
 
-  const route = routeResult.routes[0];
+  const { itinerary } = routeResult;
 
-  const distance = Math.round(route.distance);
-  const duration = Math.round(route.duration / 60);
+  const distanceText = formatDistance(itinerary.walkDistance);
+
+  const { transfers } = itinerary;
+  const timesText = `${formatTime(itinerary.startTime)} – ${formatTime(
+    itinerary.endTime
+  )} · ${
+    transfers === 0
+      ? "No transfers"
+      : `${transfers} transfer${transfers === 1 ? "" : "s"}`
+  }`;
 
   let style;
   if (mediaType === "mobile") {
@@ -54,28 +64,31 @@ const DirectionsCard = () => {
     <Card className="directions-card" style={style}>
       <Toolbar title="Route">
         <CardText>
-          {distance === 0 ? "< 1 meter" : `${distance} meters`}
+          {itinerary.hasTransit ? `${distanceText} walking` : distanceText}
         </CardText>
-        <CardText>
-          {duration === 0 ? "< 1 minute" : `${duration} minutes`}
-        </CardText>
+        <CardText>{formatDuration(itinerary.duration)}</CardText>
       </Toolbar>
+      {itinerary.hasTransit && <CardText>{timesText}</CardText>}
       <CardActions>
         <Button
           className="directions-card--button"
           raised
           primary
-          onClick={() => dispatch(clickDirectionsInfoButton())}
+          iconBefore
+          iconChildren="directions"
+          onClick={() => dispatch(clickStepsButton())}
         >
-          Trip info
+          Directions
         </Button>
         <Button
           className="directions-card--button"
           raised
           primary
-          onClick={() => dispatch(clickStepsButton())}
+          iconBefore
+          iconChildren="info"
+          onClick={() => dispatch(clickDirectionsInfoButton())}
         >
-          Directions
+          Info
         </Button>
       </CardActions>
     </Card>

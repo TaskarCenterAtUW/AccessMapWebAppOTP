@@ -6,11 +6,6 @@ const mainToolbarTour = [
     disableBeacon: true,
   },
   {
-    target: ".region-selection-open-button",
-    content: "Switch between different regions supported by AccessMap.",
-    placement: "bottom",
-  },
-  {
     target: ".login",
     content: "Sign in or create an account.",
     placement: "bottom",

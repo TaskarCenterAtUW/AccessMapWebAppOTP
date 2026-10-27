@@ -7,27 +7,46 @@ import Toolbar from "react-md/src/js/Toolbars";
 
 import ElevationProfile from "../ElevationProfile";
 
-import { RouteResult } from "types";
+import { PedestrianSegment, RouteResult, WalkLeg } from "types";
+import formatDistance from "utils/format-distance";
+import { formatDuration, formatTime } from "utils/trip-time";
 
 interface Props {
   onClose?(event: React.MouseEvent): void;
   routeResult?: RouteResult;
 }
 
+// Shorter segments, such as the ends of curb ramps, don't count towards the
+// steepest incline of a trip, and nor do stairs.
+const MIN_INCLINE_LENGTH = 3;
+
+const percent = (grade: number): string =>
+  `${Math.round(Math.abs(grade) * 1000) / 10} %`;
+
 const DirectionsInfo = ({ onClose, routeResult }: Props) => {
-  const route = routeResult.routes[0];
-  const { distance, duration } = route;
-  const durationString = Math.round(route.duration / 60);
+  const { itinerary } = routeResult;
+
+  // Elevation information comes from the walked OpenSidewalks segments only
+  const segments = itinerary.legs
+    .filter((leg): leg is WalkLeg => leg.type === "walk")
+    .reduce((acc, leg) => acc.concat(leg.segments), [] as PedestrianSegment[]);
 
   let uphillMax = 0;
   let downhillMax = 0;
-  route.legs.forEach((leg) => {
-    leg.forEach((step) => {
-      const incline = step.properties.incline || 0;
-      uphillMax = Math.max(incline, uphillMax);
-      downhillMax = Math.min(incline, downhillMax);
-    });
+  segments.forEach((segment) => {
+    if (
+      segment.highway === "steps" ||
+      (segment.distance || 0) <= MIN_INCLINE_LENGTH
+    ) {
+      return;
+    }
+    const incline = segment.incline || 0;
+    uphillMax = Math.max(incline, uphillMax);
+    downhillMax = Math.min(incline, downhillMax);
   });
+  const hasElevation = segments.some(
+    (segment) => segment.incline !== null && (segment.distance || 0) > 0
+  );
 
   return (
     <>
@@ -40,28 +59,59 @@ const DirectionsInfo = ({ onClose, routeResult }: Props) => {
         ]}
       />
       <CardText className="directions-info--contents">
-        <h4>Experienced elevation gain</h4>
-        <ElevationProfile route={routeResult.routes[0]} />
+        {hasElevation && (
+          <>
+            <h4>Experienced elevation gain</h4>
+            <ElevationProfile segments={segments} />
+          </>
+        )}
         <List>
           <ListItem
-            primaryText={`${distance.toPrecision(1)} meters`}
-            secondaryText="Total distance"
+            primaryText={formatDistance(itinerary.walkDistance)}
+            secondaryText={
+              itinerary.hasTransit ? "Walking distance" : "Total distance"
+            }
           />
           <ListItem
-            primaryText={
-              duration < 1 ? "Less than 1 minute" : `${durationString} minutes`
-            }
+            primaryText={formatDuration(itinerary.duration)}
             secondaryText="Estimated time"
           />
-          <ListItem
-            primaryText={`${(uphillMax * 100).toPrecision(1)} %`}
-            secondaryText="Steepest uphill incline"
-          />
-          <ListItem
-            primaryText={`${Math.abs(downhillMax * 100).toPrecision(1)} %`}
-            secondaryText="Steepest downhill incline"
-          />
+          {hasElevation && (
+            <ListItem
+              primaryText={percent(uphillMax)}
+              secondaryText="Steepest uphill incline"
+            />
+          )}
+          {hasElevation && (
+            <ListItem
+              primaryText={percent(downhillMax)}
+              secondaryText="Steepest downhill incline"
+            />
+          )}
+          {itinerary.hasTransit && (
+            <ListItem
+              primaryText={`${formatTime(itinerary.startTime)} – ${formatTime(
+                itinerary.endTime
+              )}`}
+              secondaryText="Departure – arrival"
+            />
+          )}
+          {itinerary.hasTransit && (
+            <ListItem
+              primaryText={`${itinerary.transfers}`}
+              secondaryText="Transfers"
+            />
+          )}
         </List>
+        <div className="md-text--secondary disclaimer">
+          <strong>Disclaimer:</strong> The routes provided by AccessMap are for
+          informational purposes only. We do not guarantee their accuracy,
+          safety, or suitability for any specific use. Users should exercise
+          their own judgment and follow local laws and regulations. By using
+          AccessMap, you acknowledge that we are not liable for any errors,
+          damages, or incidents that may occur from following the suggested
+          routes.
+        </div>
       </CardText>
     </>
   );

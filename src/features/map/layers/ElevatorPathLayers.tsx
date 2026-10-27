@@ -5,7 +5,12 @@ import { Layer } from "react-map-gl";
 
 const VISIBLE = 15;
 
-const ElevatorPaths = () => {
+interface Props {
+  // Base-style layer to draw beneath (undefined = top of the style)
+  beforeId?: string;
+}
+
+const ElevatorPaths = ({ beforeId }: Props) => {
   const widthExpression: Expression = [
     "interpolate",
     ["linear"],
@@ -36,7 +41,7 @@ const ElevatorPaths = () => {
           "line-width": widthExpression,
           "line-opacity": 0,
         }}
-        beforeId="bridge-street"
+        beforeId={beforeId}
       />
       <Layer
         id="elevator-paths"
@@ -64,7 +69,7 @@ const ElevatorPaths = () => {
             1,
           ],
         }}
-        beforeId="bridge-street"
+        beforeId={beforeId}
       />
     </>
   );

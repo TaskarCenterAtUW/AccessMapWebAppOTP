@@ -9,19 +9,21 @@ const DASH_INACCESSIBLE = [WIDTH_INACCESSIBLE * 2, WIDTH_INACCESSIBLE * 1.5];
 
 interface Props {
   avoidCurbs: boolean;
+  // Base-style layer to draw beneath (undefined = top of the style)
+  beforeId?: string;
 }
 
-const CrossingsLayers = ({ avoidCurbs }: Props) => {
+const CrossingsLayers = ({ avoidCurbs, beforeId }: Props) => {
   const widthExpression: Expression = [
     "interpolate",
     ["linear"],
     ["zoom"],
     12,
-    0.5,
+    0.3,
     16,
-    3,
+    1.8,
     22,
-    30,
+    18,
   ];
 
   const isCrossingExpression = ["==", ["get", "footway"], "crossing"];
@@ -62,7 +64,7 @@ const CrossingsLayers = ({ avoidCurbs }: Props) => {
           "line-width": widthExpression,
           "line-opacity": 0,
         }}
-        beforeId="bridge-street"
+        beforeId={beforeId}
       />
       <Layer
         id="crossing-inaccessible"
@@ -92,7 +94,7 @@ const CrossingsLayers = ({ avoidCurbs }: Props) => {
             1,
           ],
         }}
-        beforeId="bridge-street"
+        beforeId={beforeId}
       />
       <Layer
         id="crossing-unmarked"
@@ -113,7 +115,7 @@ const CrossingsLayers = ({ avoidCurbs }: Props) => {
             1,
           ],
         }}
-        beforeId="bridge-street"
+        beforeId={beforeId}
       />
       <Layer
         id="crossing-marked-background"
@@ -135,7 +137,7 @@ const CrossingsLayers = ({ avoidCurbs }: Props) => {
             1,
           ],
         }}
-        beforeId="bridge-street"
+        beforeId={beforeId}
       />
       <Layer
         id="crossing-marked-outline"
@@ -148,16 +150,16 @@ const CrossingsLayers = ({ avoidCurbs }: Props) => {
           "line-color": "#fff",
           "line-gap-width": {
             stops: [
-              [12, 0.4],
-              [16, 1.5],
-              [22, 15],
+              [12, 0.25],
+              [16, 0.9],
+              [22, 9],
             ],
           },
           "line-width": {
             stops: [
-              [12, 0.1],
-              [16, 0.5],
-              [22, 4],
+              [12, 0.06],
+              [16, 0.3],
+              [22, 2.4],
             ],
           },
           "line-opacity": [
@@ -170,7 +172,7 @@ const CrossingsLayers = ({ avoidCurbs }: Props) => {
             1,
           ],
         }}
-        beforeId="bridge-street"
+        beforeId={beforeId}
       />
     </>
   );
