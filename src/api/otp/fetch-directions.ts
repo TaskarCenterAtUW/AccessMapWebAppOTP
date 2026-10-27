@@ -132,6 +132,10 @@ fragment place on Place {
 
 const WHEELCHAIR_PROFILES = ["wheelchair", "powered"];
 
+// Trips are planned on the OpenSidewalks data, not on other street data such as
+// OpenStreetMap that the server may also have.
+const STREET_NETWORK = "OPEN_SIDEWALKS";
+
 export const planVariables = (options: DirectionsOptions) => {
   const { origin, destination, profile, tripOptions } = options;
 
@@ -153,6 +157,7 @@ export const planVariables = (options: DirectionsOptions) => {
     },
     preferences: {
       street: {
+        network: STREET_NETWORK,
         walk: {
           speed: profile.speed,
           pedestrianCost: [
