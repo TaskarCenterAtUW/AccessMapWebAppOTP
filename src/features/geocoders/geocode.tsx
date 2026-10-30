@@ -1,3 +1,5 @@
+import config from "constants/config";
+
 const MAPTILER_GEOCODING_URL = "https://api.maptiler.com/geocoding";
 
 type BboxType = [number, number, number, number];
@@ -24,7 +26,7 @@ const geocode = (
   }
 
   // TODO: set country code from region
-  const params = new URLSearchParams({ key: MAPTILER_KEY });
+  const params = new URLSearchParams({ key: config.maptilerKey });
   if (proximity) {
     params.set("proximity", `${proximity.longitude},${proximity.latitude}`);
   }
