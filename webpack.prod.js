@@ -22,7 +22,6 @@ module.exports = merge(common, {
   plugins: [
     new webpack.DefinePlugin({
       NODE_ENV: JSON.stringify("production"),
-      MAPTILER_KEY: JSON.stringify(process.env.MAPTILER_KEY),
       API_SERVER: JSON.stringify(process.env.API_SERVER),
       ROUTING_SERVER: JSON.stringify(process.env.ROUTING_SERVER),
       TILE_SERVER: JSON.stringify(process.env.TILE_SERVER),

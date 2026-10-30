@@ -5,6 +5,8 @@ import { Source } from "react-map-gl";
 
 import regions from "constants/regions";
 
+// The boundary of a dataset can have several parts and holes: the world is masked except for each
+// part, and each hole is masked again.
 const RegionsMaskSource = () => {
   const outer_ring = [
     [-180, -90],
@@ -13,18 +15,19 @@ const RegionsMaskSource = () => {
     [180, -90],
     [-180, -90],
   ];
-  const inner_rings = regions.features.map((feature) => {
-    const coords: Position[] = feature.geometry.coordinates[0][0];
-    return coords;
-  });
+  const polygons: Position[][][] = regions.features.flatMap(
+    (feature) => feature.geometry.coordinates
+  );
+  const part_rings = polygons.map((polygon) => polygon[0]);
+  const holes = polygons.flatMap((polygon) =>
+    polygon.slice(1).map((hole) => [hole])
+  );
 
-  // TODO: use a geojson inverter helper function to handle inverting
-  // multipolygons in the future?
   const invertedPolygon: Feature = {
     type: "Feature",
     geometry: {
       type: "MultiPolygon",
-      coordinates: [[outer_ring, ...inner_rings]],
+      coordinates: [[outer_ring, ...part_rings], ...holes],
     },
     properties: {},
   };

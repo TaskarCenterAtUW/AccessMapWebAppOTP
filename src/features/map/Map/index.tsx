@@ -23,6 +23,8 @@ import { useAppSelector, useAppDispatch } from "hooks";
 import { CLICKABLE_LAYERS } from "constants/layers";
 import { move, moveEnd, click, load, resize as resizeMap } from "../map-slice";
 
+import config from "constants/config";
+
 import unsupportedAreaImage from "../images/unsupported-area-image";
 import directionArrowImage from "../images/direction-arrow";
 import directionArrowWhiteImage from "../images/direction-arrow-white";
@@ -38,7 +40,7 @@ const loadImageIfNotLoaded = (map, name, image) => {
 
 // MapTiler base map style. Change the style id here to switch base maps.
 const MAPTILER_STYLE_ID = "streets-v2";
-const MAP_STYLE = `https://api.maptiler.com/maps/${MAPTILER_STYLE_ID}/style.json?key=${MAPTILER_KEY}`;
+const MAP_STYLE = `https://api.maptiler.com/maps/${MAPTILER_STYLE_ID}/style.json?key=${config.maptilerKey}`;
 
 // Id of the first symbol (label) layer in the loaded base style, so AccessMap
 // lines can be drawn beneath the base map's labels. Returns undefined if the
