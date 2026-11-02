@@ -1,3 +1,5 @@
+import regions from "constants/regions";
+
 const mainToolbarTour = [
   {
     target: "#main-menu",
@@ -5,6 +7,16 @@ const mainToolbarTour = [
     placement: "bottom",
     disableBeacon: true,
   },
+  // With one region there is no button to show
+  ...(regions.features.length > 1
+    ? [
+        {
+          target: ".region-selection-open-button",
+          content: "Switch between different regions supported by AccessMap.",
+          placement: "bottom",
+        },
+      ]
+    : []),
   {
     target: ".login",
     content: "Sign in or create an account.",

@@ -9,7 +9,6 @@ import POICard from "features/waypoints/POICard";
 import FloatingButtons from "features/map/FloatingButtons";
 import LinksModal from "features/links-modal/LinksModal";
 import OmniCard from "features/omnicard/OmniCard";
-import RegionButton from "features/region/RegionButton";
 import RegionSelector from "features/region/RegionSelector";
 import DirectionsCard from "features/directions/DirectionsCard";
 import DirectionsSheet from "features/directions/DirectionsSheet";
@@ -61,7 +60,6 @@ const App = () => {
       <SpeedLegend />
       <Tour />
       <SignupPrompt />
-      <RegionButton />
       <RegionSelector />
       <LinksModal />
     </>
