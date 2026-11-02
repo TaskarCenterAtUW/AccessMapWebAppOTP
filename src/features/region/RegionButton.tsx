@@ -21,13 +21,6 @@ const RegionButton = () => {
     <Button
       key="region-open-button"
       className="region-selection-open-button"
-      style={{
-        position: "fixed",
-        top: 8,
-        right: 64,
-        zIndex: 15,
-        background: "#fff",
-      }}
       flat
       primary
       onClick={() => dispatch(startSelectingRegion())}

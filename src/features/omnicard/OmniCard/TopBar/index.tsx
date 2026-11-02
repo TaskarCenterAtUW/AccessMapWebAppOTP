@@ -4,6 +4,8 @@ import Button from "react-md/src/js/Buttons";
 import SVGIcon from "react-md/src/js/SVGIcons";
 import Toolbar from "react-md/src/js/Toolbars";
 
+import RegionButton from "features/region/RegionButton";
+
 import AccessMapLogo from "!babel-loader!@svgr/webpack?icon=true!icons/accessmap-logo.svg";
 import AccessMapLogoSmall from "!babel-loader!@svgr/webpack?icon=true!icons/accessmap-logo-small.svg";
 
@@ -34,6 +36,7 @@ const TopBar = ({ miniLogo = false }: Props) => {
           <SVGIcon use={menu.url} />
         </Button>
       }
+      actions={[<RegionButton key="region-button" />]}
     >
       <div className="accessmap-title" key="accessmap-brand" aria-hidden>
         {miniLogo ? (
