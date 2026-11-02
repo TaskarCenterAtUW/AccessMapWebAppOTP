@@ -105,18 +105,16 @@ See `doc/user/sandbox/OpenSidewalks.md` in OTP for what the configuration does.
    rm -rf node_modules/node-sass
    ```
 
-2. Copy `.env.sample` to `.env` and set:
+2. Copy `.env.sample` to `.env` and set `ROUTING_SERVER` to where OTP is, for example
+   `http://localhost:8080`, with the `http://`. The other variables can be left empty.
 
-   | Variable         | Value                                                                  |
-   | ---------------- | ---------------------------------------------------------------------- |
-   | `MAPTILER_KEY`   | A MapTiler API key. Restrict it to your domains: it is in the page.    |
-   | `ROUTING_SERVER` | Where OTP is, for example `http://localhost:8080`, with the `http://`. |
+3. Copy `config.json.example` to `config.json`, and set in it:
 
-   The other variables can be left empty.
-
-3. Copy `regions.json.example` to `regions.json`. It has the regions the app offers, as GeoJSON
-   features with a `MultiPolygon` and the properties `id`, `name`, `bounds`, `lon`, `lat` and
-   `zoom`. The first region is the one the app starts in.
+   - `maptilerKey`: a MapTiler API key. Restrict it to your domains: it is in the page.
+   - `regions`: the regions the app offers, as GeoJSON features with a `MultiPolygon`, which can
+     have several parts and holes, and the properties `id`, `key`, `name`, `bounds`, `lon`, `lat`
+     and `zoom`. The first is the one the app starts in. With more than one, the app has a button
+     to change region.
 
 4. Start the development server on port 3000:
 
@@ -130,7 +128,8 @@ The development server sends `/api/v1/routing/*` to `ROUTING_SERVER`, so the app
 GraphQL API at `/api/v1/routing/otp/gtfs/v1` and its tiles at
 `/api/v1/routing/otp/routers/default/vectorTiles/transportation/{z}/{x}/{y}.pbf`. A production
 build (`npm run build`) does not do this: put it behind a web server that sends
-`/api/v1/routing/` to OTP and leaves out that prefix.
+`/api/v1/routing/` to OTP and leaves out that prefix, and that serves `config.json` at
+`/config.json`. The app reads it when it starts, so the same build can be used anywhere.
 
 ## Sponsors / Supporters of Open Source
 

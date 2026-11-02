@@ -1,4 +1,6 @@
-import regions from "../../regions.json";
+import config from "constants/config";
+
+const regions = config.regions;
 
 const defaultRegion = regions.features[0];
 

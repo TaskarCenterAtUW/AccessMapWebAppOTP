@@ -1,6 +1,5 @@
 // Environment variables for configuration
 declare var NODE_ENV: string;
-declare var MAPTILER_KEY: string;
 declare var API_SERVER: string;
 declare var ROUTING_SERVER: string;
 declare var TILE_SERVER: string;
